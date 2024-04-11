@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Partiendo la quinta clase</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+        <style>
+            image {
+                filter: grayscale(1);
+                opacity: 0.3;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <!--hagamos una tabla tr es cada fila, td es como calda columna dentro de esa fila, cada celda de esa fila-->
+                    <h1 class="mt-5"> Memorias de Diseño del ámbito de Discapacidad</h1>
+                    <h2>(Sólo las notas de superación)</h2>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr class="table-dark">
+                                <th scope="col">Apellido/Nombre</th>
+                                <th scope="col">Año</th>
+                                <th scope="col">Título</th>
+                                <th scope="col">Profe guía</th>
+                                <th scope="col">Nota</th>
+                            </tr>
+                        </thead>
+                        <tbody id="superacion" class="table-light"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <script>
+            var seleccion = [];
+            var ambitos = [];
+            var ambitosOK = [];
+            async function datos() {
+                const consulta = await fetch("https://raw.githubusercontent.com/profesorfaco/dno097-2024/main/clase-06/data.json");
+                const data = await consulta.json();
+                console.log(data);
+                //acortemos los datos con ámbito y pdf
+                data.forEach((d) => {
+                    //lo que viene aquí repara la información y luego eso lo tira a selección
+                    //toma la nota título y reemplaza la , por . y luego lo transforma en un flotante (decimal)
+                    d.nota_titulo = parseFloat(d.nota_titulo.replace(",", "."));
+                    d.nota_pga = parseFloat(d.nota_pga.replace(",", "."));
+                    d.nota_seminario = parseFloat(d.nota_seminario.replace(",", "."));
+                    d.year = Number(d.year);
+                    d.pdf_ok = Number(d.pdf_ok);
+                    //aqui se menten todos los ambitos en un arreglo
+                    ambitos.push(d.ambito);
+
+                    // new set se encarga de eliminar los repetidos de la variable ambitos
+                    ambitosOK = [...new Set(ambitos)];
+                    // sort ordena alfabeticamente
+                    ambitosOK.sort();
+                    // Se le pide al computador que se fije en los +ambitos y taambién si está el PDF
+                    // iscapa hacer referencia a discapacidad
+                    if (d.ambito.includes("iscapa") && d.pdf_ok == 1) {
+                        // Cada vez que encuentre lo del id se va a meter la línea completa en la variable seleccion que es un arreglo
+                        seleccion.push(d);
+                    }
+                });
+                console.log(seleccion);
+                console.log(ambitos);
+                console.log(ambitosOK);
+
+                seleccion.forEach((s) => {
+                    if (s.nota_pga < s.nota_titulo && s.nota_titulo >= 6) {
+                        superacion.innerHTML += `<tr><td>${s.nombre_paterno} ${s.nombre_materno}, ${s.nombre_pila[0]}</td><td>${s.year}</td><td><a href="https://diseno.uc.cl/memorias/pdf/${s.nombre_pdf}">${s.nombre_proyecto}</a></td><td>${s.nombre_guia}</td><td>${s.nota_titulo.toFixed(1)}</td></tr>`;
+                    }
+                });
+            }
+            datos().catch((error) => console.error(error));
+        </script>
+    </body>
+</html>
+<!-- TAREA Generar un arreglo en qeue se sumen todos los ámbitos que existen, luego que se limpien los repetidos y luego solo esos deben salir en la consola y en la página. -->
+<!-- debo crear una variable ambito y luego meter todos los ámbitos ahí que no están repetidos -->
+<!-- imprmir solo aquellas en que en hay superacióm. nota PGA menor a nota de titulo = superacion -->
+<!-- Apellido/nombre - año - título (vinculo a pdf con <a>) - profedor guia - nota-->
+<!-- las tablas tienen 2 partes, un head y un tbody, para este ejercicio el tbody va a tener id="superacion" -->
